@@ -89,8 +89,8 @@ int memory_init(void)
  
  enum 
  {
-  TXFE = 0x80,
-  RXFF = 0x40,
+  TXFF = 0x10,
+  RXFE = 0x20,
  };
 
   
@@ -165,8 +165,7 @@ ssize_t memory_read(pl011_T* uart,  struct file *filp, char *buf,
                     size_t count, loff_t *f_pos)
 {
  ssize_t retval = 0; 
-  while((ioread32(uart->FR)) & RXFF) == 1)
-{   
+  while(((ioread32(uart->FR)) & RXFE) == 1);
   memory_buffer = ioread8(uart->DR); 
    
   if (copy_to_user(buf,memory_buffer,1)) 
@@ -185,7 +184,7 @@ ssize_t memory_read(pl011_T* uart,  struct file *filp, char *buf,
 
 out:
  return retval;
-}
+
 }
 
 
@@ -193,8 +192,7 @@ out:
 ssize_t memory_write( pl011_T* uart, struct file *filp, char *buf,
                       size_t count, loff_t *f_pos) 
 {
- while((ioread32(uart->FR) & TXFE) == 1)
- {   
+ while(((ioread32(uart->FR)) & TXFF) == 1);   
 
   ssize_t retval = 0;
   char *temp;
@@ -212,6 +210,6 @@ iowrite8(memory_buffer, (uart->DR));
 
  out:
   return retval;
-}
+
 
 }
